@@ -28,9 +28,9 @@ public class TableParserListener extends AnalysisEventListener<Map> {
     @Value("${table.excel.columnsRow}")
     private Integer columnsRow;
 
-    private static Map<Integer, Map<Integer, Field>> tableInfos = new HashMap<>();
+    private static final Map<Integer, Map<Integer, Field>> tableInfos = new HashMap<>();
 
-    private static Map<Integer, Field> columnInfos = new HashMap<>();
+    private static final Map<Integer, Field> columnInfos = new HashMap<>();
 
     private static Field columnsField;
 
@@ -53,10 +53,6 @@ public class TableParserListener extends AnalysisEventListener<Map> {
     private void initColumnInfo() {
         Field[] fields = Column.class.getDeclaredFields();
         for (Field field : fields) {
-            Columns columns = field.getAnnotation(Columns.class);
-            if (columns != null) {
-                columnsField = field;
-            }
 
             ColumnInfo columnInfo = field.getAnnotation(ColumnInfo.class);
             if (columnInfo == null) {
@@ -70,6 +66,10 @@ public class TableParserListener extends AnalysisEventListener<Map> {
 
         Field[] fields = Table.class.getDeclaredFields();
         for (Field field : fields) {
+            Columns columns = field.getAnnotation(Columns.class);
+            if (columns != null) {
+                columnsField = field;
+            }
             TableInfo tableInfo = field.getAnnotation(TableInfo.class);
             if (tableInfo == null) {
                 continue;
@@ -106,9 +106,10 @@ public class TableParserListener extends AnalysisEventListener<Map> {
             field.setAccessible(true);
             field.set(column, value);
         }
-        List<Column> columns = table.getColumns();
+        columnsField.setAccessible(true);
+        List<Column> columns = (List<Column>) columnsField.get(table);
         columns.add(column);
-        table.setColumns(columns);
+        columnsField.set(table, columns);
 
     }
 
@@ -129,7 +130,7 @@ public class TableParserListener extends AnalysisEventListener<Map> {
         setTable(table);
     }
 
-    @Override
+    @Override    
     public void doAfterAllAnalysed(AnalysisContext context) {
         LOGGER.info(JSON.toJSONString(getTable()));
         setTable(new Table());
