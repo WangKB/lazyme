@@ -3,6 +3,7 @@ package me.wss.lazyme.bean;
 import me.wss.lazyme.annotation.Columns;
 import me.wss.lazyme.annotation.TableInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Table {
@@ -17,7 +18,7 @@ public class Table {
     private String className;
 
     @Columns
-    private List<Column> columns;
+    private List<Column> columns = new ArrayList<>();
 
     public String getEntityName() {
         return entityName;
@@ -41,5 +42,13 @@ public class Table {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public List<Column> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<Column> columns) {
+        this.columns = columns;
     }
 }

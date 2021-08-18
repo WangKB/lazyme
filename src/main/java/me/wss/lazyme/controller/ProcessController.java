@@ -3,8 +3,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelReader;
 import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.metadata.ReadSheet;
-import me.wss.lazyme.bean.Table;
-import me.wss.lazyme.listener.SimpleRowListener;
+import me.wss.lazyme.listener.TableParserListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -18,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +26,7 @@ import java.util.Map;
 public class ProcessController {
 
     @Resource
-    private SimpleRowListener simpleRowListener;
+    private TableParserListener tableParserListener;
 
     @PostMapping
     public String process(@RequestParam("template") MultipartFile template, String jsonModel) throws IOException, TemplateException {
@@ -52,23 +50,12 @@ public class ProcessController {
     @PostMapping("parseTableExcel")
     public String parseTableExcel(@RequestParam("excel") MultipartFile excel) throws IOException {
 
-        ExcelReaderBuilder excelReaderBuilder = EasyExcel.read(excel.getInputStream(), simpleRowListener).headRowNumber(0);
+        ExcelReaderBuilder excelReaderBuilder = EasyExcel.read(excel.getInputStream(), tableParserListener).headRowNumber(0);
         ExcelReader excelReader = excelReaderBuilder.build();
         List<ReadSheet> sheets = excelReader.excelExecutor().sheetList();
         for (ReadSheet sheet : sheets) {
             excelReader.read(sheet);
         }
         return "success";
-    }
-
-    public static void main(String[] args) {
-
-        File file = new File("F://projects/utils/lazyme/data/测试数据.xlsx");
-        ExcelReaderBuilder excelReaderBuilder = EasyExcel.read(file, new SimpleRowListener()).headRowNumber(0);
-        ExcelReader excelReader = excelReaderBuilder.build();
-        List<ReadSheet> sheets = excelReader.excelExecutor().sheetList();
-        for (ReadSheet sheet : sheets) {
-            excelReader.read(sheet);
-        }
     }
 }
