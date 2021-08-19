@@ -1,14 +1,15 @@
 package me.wss.lazyme.controller;
+
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelReader;
 import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.metadata.ReadSheet;
-import me.wss.lazyme.listener.TableParserListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import me.wss.lazyme.listener.TableParserListener;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.*;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/process")
@@ -37,14 +40,10 @@ public class ProcessController {
         String content = new String(template.getBytes());
         Template t = new Template("template", new StringReader(content), cfg);
 
-        Map<String, Object> model =
-                new ObjectMapper().readValue(jsonModel, HashMap.class);
-
         Writer out = new StringWriter();
-        t.process(model, out);
+        t.process(new ObjectMapper().readValue(jsonModel, HashMap.class), out);
 
-        String transformedTemplate = out.toString();
-        return transformedTemplate;
+        return out.toString();
     }
 
     @PostMapping("parseTableExcel")
